@@ -44,9 +44,15 @@ export const metadata: Metadata = {
     description: site.statement,
     type: "website",
     locale: "en_GB",
+    // A real .png in public/ rather than Next's generated route: on a
+    // static export that route is written without a file extension, so
+    // static hosts serve it as octet-stream and scrapers drop it.
+    // Regenerate with `npm run og` after editing site.ts.
+    images: [{ url: "/og.png", width: 1200, height: 630, alt: site.statement }],
   },
   twitter: {
     card: "summary_large_image",
+    images: ["/og.png"],
   },
 };
 

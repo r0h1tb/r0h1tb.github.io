@@ -7,7 +7,8 @@
     "build": "npm run check:design && next build",
     "start": "next start",
     "lint": "eslint",
-    "check:design": "node scripts/check-design.mjs"
+    "check:design": "node scripts/check-design.mjs",
+    "og": "node --experimental-strip-types scripts/make-og.mjs"
   },
   "dependencies": {
     "@shikijs/rehype": "^4.4.1",
