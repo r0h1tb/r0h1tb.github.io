@@ -1,26 +1,384 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   TOKEN SYSTEM — Swiss editorial
+   See ../../DESIGN-PLAYBOOK.md
+
+   Direction: type carries the design. Ink on paper, one signal
+   colour, strict grid broken on purpose.
+
+   Deliberately NOT:
+   - cream + serif + terracotta   (AI cliché cluster #1)
+   - near-black + acid green      (AI cliché cluster #2)
+   ============================================================ */
+
+@theme {
+  /* Nuke the defaults. `initial` clears the whole namespace, so the
+     stock Tailwind palette utilities do not exist at all — they fail
+     loudly instead of silently shipping. */
+  --color-*: initial;
+  --font-*: initial;
+  --shadow-*: initial;
+  --radius-*: initial;
+  --text-*: initial;
+
+  /* --- Colour: 6 values, warm-neutral greys, one signal ------ */
+  --color-transparent: transparent;
+  --color-current: currentColor;
+
+  --color-paper: #fbfaf7; /* page                     */
+  --color-sunk: #f0eee8; /* recessed panels          */
+  --color-rule: #dad6cc; /* hairlines                */
+  --color-ink: #16151a; /* headlines, body          */
+  --color-muted: #55535c; /* secondary text           */
+  --color-faint: #6e6b73; /* captions, metadata       */
+  --color-signal: #c8102e; /* the ONE accent           */
+
+  /* `faint` carries 11px mono labels, dates and the ledger's figures, so
+     it is held to 4.5:1 against BOTH paper and sunk (hovered rows) —
+     5.01:1 and 4.51:1. The lighter grey this replaced looked better and
+     failed AA at 3.33:1. Verified, not eyeballed: small text needs more
+     contrast, not less. Re-check any change with a WCAG calculator. */
+
+  /* --- Type: three roles ------------------------------------ */
+  --font-display: var(--font-instrument-serif), "Times New Roman", serif;
+  --font-body: var(--font-archivo), system-ui, sans-serif;
+  --font-mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /* --- Scale: note the jump from 18 -> 44 -> clamp ----------- */
+  --text-micro: 0.6875rem; /* 11 — labels, numerals   */
+  --text-caption: 0.8125rem; /* 13 — captions           */
+  --text-sm: 0.9375rem; /* 15 — UI                 */
+  --text-body: 1.125rem; /* 18 — reading            */
+  --text-lead: 1.375rem; /* 22 — standfirst         */
+  --text-h3: 1.75rem; /* 28                      */
+  --text-h2: 2.75rem; /* 44                      */
+  --text-h1: clamp(3.25rem, 8.5vw, 7rem);
+  --text-mega: clamp(4.5rem, 15vw, 13rem);
+
+  /* --- Radius: one value, and it is zero -------------------- */
+  --radius-none: 0px;
+  --radius-full: 9999px;
+
+  /* --- Motion: real easing, not ease-in-out ----------------- */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
+/* --- Dark: inverted ink/paper, not a different design -------- */
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    color-scheme: light;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      color-scheme: dark;
+      --color-paper: #121116;
+      --color-sunk: #1a191f;
+      --color-rule: #2e2c36;
+      --color-ink: #f2f0ea;
+      --color-muted: #9c99a4;
+      --color-faint: #83808b; /* 4.86:1 on paper, 4.51:1 on sunk */
+      --color-signal: #ff4438;
+    }
+  }
+
+  :root[data-theme="dark"] {
+    color-scheme: dark;
+    --color-paper: #121116;
+    --color-sunk: #1a191f;
+    --color-rule: #2e2c36;
+    --color-ink: #f2f0ea;
+    --color-muted: #9c99a4;
+    --color-faint: #83808b; /* 4.86:1 on paper, 4.51:1 on sunk */
+    --color-signal: #ff4438;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: var(--text-body);
+    line-height: 1.55;
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Numbers that sit in columns must not dance. */
+  time,
+  .tnum,
+  table {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Optical alignment: quotes and punctuation hang past the margin
+     so the text edge *looks* straight. Mechanical alignment doesn't. */
+  .hang-punct {
+    hanging-punctuation: first last;
+  }
+
+  ::selection {
+    background-color: var(--color-signal);
+    color: var(--color-paper);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-signal);
+    outline-offset: 3px;
+  }
+
+  a,
+  button {
+    color: inherit;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   CRAFT LAYER
+   ============================================================ */
+
+/* Grain. Real film grain is irregular; feTurbulence is the closest
+   we get without shipping an image. Kept at 3.5% — if you can see
+   it as texture rather than feel it, it is too heavy. */
+.grain::after {
+  content: "";
+  position: fixed;
+  inset: -50%;
+  z-index: 60;
+  pointer-events: none;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* Staggered reveal. Children offset by index so nothing moves in
+   perfect sync — synchronised fade-up is the tell. */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.rise {
+  animation: rise 0.9s var(--ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 65ms);
+}
+
+/* Rule that draws itself in. */
+@keyframes draw {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+
+.draw {
+  transform-origin: left;
+  animation: draw 1.1s var(--ease-out-expo) both;
+  animation-delay: calc(var(--i, 0) * 65ms);
+}
+
+/* Link underline that grows from the left rather than fading. */
+.link {
+  background-image: linear-gradient(currentColor, currentColor);
+  background-repeat: no-repeat;
+  background-position: 0 100%;
+  background-size: 0% 1px;
+  transition: background-size 0.4s var(--ease-out-expo);
+}
+
+.link:hover,
+.link:focus-visible {
+  background-size: 100% 1px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ============================================================
+   PROSE — rendered markdown
+   Hand-written rather than @tailwindcss/typography, because that
+   plugin's defaults are part of the sameness we are avoiding.
+   ============================================================ */
+
+.prose {
+  max-width: 42rem;
+  hanging-punctuation: first last;
+}
+
+.prose > * + * {
+  margin-top: 1.35em;
+}
+
+.prose p {
+  color: var(--color-ink);
+  line-height: 1.62;
+  text-wrap: pretty;
+}
+
+.prose h2 {
+  margin-top: 2.6em;
+  font-family: var(--font-display);
+  font-size: var(--text-h3);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.prose h3 {
+  margin-top: 2em;
+  font-family: var(--font-body);
+  font-size: var(--text-body);
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+
+.prose h2 + *,
+.prose h3 + * {
+  margin-top: 0.7em;
+}
+
+.prose a {
+  color: var(--color-signal);
+  text-underline-offset: 0.2em;
+  text-decoration-thickness: 1px;
+  text-decoration-line: underline;
+}
+
+.prose strong {
+  font-weight: 600;
+}
+
+.prose ul,
+.prose ol {
+  padding-left: 1.4em;
+}
+
+.prose ul {
+  list-style: none;
+}
+
+/* Em-dash bullets rather than discs — a small print convention. */
+.prose ul > li::before {
+  content: "—";
+  position: absolute;
+  margin-left: -1.4em;
+  color: var(--color-faint);
+}
+
+.prose ol {
+  list-style: decimal;
+}
+
+.prose li {
+  position: relative;
+  margin-top: 0.5em;
+  line-height: 1.6;
+}
+
+.prose blockquote {
+  border-left: 2px solid var(--color-signal);
+  padding-left: 1.25rem;
+  font-family: var(--font-display);
+  font-size: var(--text-lead);
+  line-height: 1.35;
+}
+
+.prose blockquote p {
+  margin-top: 0;
+}
+
+.prose hr {
+  margin-block: 3em;
+  border: 0;
+  border-top: 1px solid var(--color-rule);
+}
+
+.prose img {
+  max-width: 100%;
+  height: auto;
+}
+
+.prose :not(pre) > code {
+  font-family: var(--font-mono);
+  font-size: 0.875em;
+  background-color: var(--color-sunk);
+  border: 1px solid var(--color-rule);
+  padding: 0.1em 0.35em;
+}
+
+.prose pre {
+  overflow-x: auto;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--color-rule);
+  font-size: var(--text-caption);
+  line-height: 1.6;
+  tab-size: 2;
+}
+
+.prose table {
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: var(--text-sm);
+}
+
+.prose th,
+.prose td {
+  border-bottom: 1px solid var(--color-rule);
+  padding: 0.6em 0.9em 0.6em 0;
+  text-align: left;
+}
+
+.prose th {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  text-transform: uppercase;
+  letter-spacing: 0.16em;
+  color: var(--color-faint);
+  font-weight: 400;
+}
+
+/* Shiki dual-theme. `defaultColor: false` emits both as custom
+   properties; we pick one per colour scheme so code blocks follow
+   the page instead of staying stuck in one theme. */
+.shiki,
+.shiki span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .shiki,
+  :root:not([data-theme="light"]) .shiki span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+}
+
+:root[data-theme="dark"] .shiki,
+:root[data-theme="dark"] .shiki span {
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
 }

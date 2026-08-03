@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!--
+    Favicon as ledger, not monogram.
+
+    A letterform at 16px is mush, and the stock Next.js icon this replaces
+    said the same thing Inter says: nobody chose anything. Three rules of
+    unequal length read as an index at any size, and echo the hairline
+    rules the site is built from. Top rule is the signal colour, spent
+    once — same rule as everywhere else.
+  -->
+  <rect width="32" height="32" fill="#16151a" />
+  <rect x="6" y="9" width="20" height="2.5" fill="#c8102e" />
+  <rect x="6" y="15" width="14" height="2.5" fill="#fbfaf7" />
+  <rect x="6" y="21" width="17" height="2.5" fill="#fbfaf7" />
+</svg>
