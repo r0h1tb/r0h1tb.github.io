@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllWork, getWork } from "@/lib/content";
 import { ReadingProgress, Shell } from "@/components/section";
+import { CaseNav } from "@/components/case-nav";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -24,6 +25,11 @@ export default async function WorkDetail({ params }: Params) {
   const { slug } = await params;
   const work = await getWork(slug);
   if (!work) notFound();
+
+  // Neighbours in the same order the index shows them, so prev/next
+  // matches the sequence the reader arrived from.
+  const all = getAllWork();
+  const at = all.findIndex((w) => w.slug === slug);
 
   return (
     <Shell>
@@ -112,6 +118,8 @@ export default async function WorkDetail({ params }: Params) {
           className="prose mt-14 lg:ml-[calc(14rem+4rem)]"
           dangerouslySetInnerHTML={{ __html: work.html }}
         />
+
+        <CaseNav prev={all[at - 1]} next={all[at + 1]} />
       </article>
     </Shell>
   );
