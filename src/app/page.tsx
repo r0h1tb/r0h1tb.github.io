@@ -4,6 +4,7 @@ import { formatDate, getAllPosts, getAllWork } from "@/lib/content";
 import { SectionHead, Shell } from "@/components/section";
 import { WorkIndex } from "@/components/work-index";
 import { UpstreamLedger } from "@/components/upstream-ledger";
+import { Ticker } from "@/components/ticker";
 import { upstream } from "@/lib/upstream";
 
 export default function Home() {
@@ -13,75 +14,77 @@ export default function Home() {
   return (
     <Shell>
       {/* ---- HERO -------------------------------------------------
-          Grid break #1: the statement column starts in the second
-          track and runs wider than the meta column, so the composition
-          is deliberately off-centre rather than a centred stack. */}
-      <section className="grid grid-cols-1 gap-y-10 pb-24 pt-16 sm:pt-24 lg:grid-cols-[minmax(0,14rem)_minmax(0,1fr)] lg:gap-x-16 lg:pb-36">
-        <aside className="rise order-2 lg:order-1 lg:pt-3">
-          <dl className="space-y-5 font-mono text-micro uppercase tracking-[0.18em]">
-            <div>
-              <dt className="text-faint">Role</dt>
-              <dd className="mt-1 text-ink">{site.role}</dd>
-            </div>
-            <div>
-              <dt className="text-faint">Based</dt>
-              <dd className="mt-1 text-ink">{site.location}</dd>
-            </div>
-            {site.now && (
-              <div>
-                <dt className="text-faint">Now</dt>
-                <dd className="mt-1 text-ink">{site.now}</dd>
+          The statement is set at viewport scale and allowed to run to
+          the full measure — the old version reserved a narrow column
+          for it and left the page reading empty. Meta is now a dense
+          rail of hairline-separated rows rather than four lonely
+          labels. */}
+      <section className="hero-fade grid grid-cols-1 gap-y-12 pb-20 pt-14 sm:pt-20 lg:grid-cols-[minmax(0,13rem)_minmax(0,1fr)] lg:gap-x-14 lg:pb-28">
+        <aside className="rise order-2 lg:order-1 lg:pt-4">
+          <dl className="border-t border-rule font-mono text-micro uppercase tracking-[0.18em]">
+            {[
+              ["Role", site.role],
+              ["Based", site.location],
+              ...(site.now ? [["Now", site.now]] : []),
+              ["Index", `${String(work.length).padStart(2, "0")} projects`],
+              ["Upstream", `${upstream.length} projects`],
+            ].map(([label, value]) => (
+              <div
+                key={label}
+                className="flex items-baseline justify-between gap-4 border-b border-rule py-2.5"
+              >
+                <dt className="text-faint">{label}</dt>
+                <dd className="tnum text-right text-ink">{value}</dd>
               </div>
-            )}
-            <div>
-              <dt className="text-faint">Index</dt>
-              <dd className="tnum mt-1 text-ink">
-                {String(work.length).padStart(2, "0")} projects
-              </dd>
-            </div>
+            ))}
           </dl>
         </aside>
 
         <div className="order-1 lg:order-2">
           <h1
-            className="hang-punct rise font-display text-h1 leading-[0.92] tracking-[-0.02em]"
+            className="hang-punct rise font-display text-h1 leading-[0.86] tracking-[-0.035em]"
             style={{ "--i": 1 } as React.CSSProperties}
           >
-            {site.statement}
+            I build banking APIs
+            <br />
+            where a retry has to be{" "}
+            {/* The one word the whole page is about. */}
+            <em className="not-italic text-signal">idempotent.</em>
           </h1>
 
-          <p
-            className="rise mt-10 max-w-[52ch] text-lead leading-[1.45] text-muted"
+          <div
+            className="rise mt-12 grid gap-x-12 gap-y-8 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-end"
             style={{ "--i": 2 } as React.CSSProperties}
           >
-            Three years on account-servicing and payment APIs for a global
-            bank&rsquo;s core banking platform — the kind of system where a
-            rollback plan matters as much as the feature. Java, Spring
-            Boot, and a lot of time spent on failure modes. Outside work I
-            send fixes upstream to libraries I actually use.
-          </p>
+            <p className="max-w-[46ch] text-lead leading-[1.4] text-muted">
+              Three years on account-servicing and payment APIs for a
+              global bank&rsquo;s core banking platform — the kind of
+              system where a rollback plan matters as much as the
+              feature. Outside work I send fixes upstream to libraries I
+              actually use.
+            </p>
 
-          <div
-            className="rise mt-10 flex flex-wrap items-center gap-x-8 gap-y-3 font-mono text-micro uppercase tracking-[0.18em]"
-            style={{ "--i": 3 } as React.CSSProperties}
-          >
-            <a href={`mailto:${site.email}`} className="link text-signal">
-              Email me ↗
-            </a>
-            {site.links.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target="_blank"
-                rel="noreferrer"
-                className="link text-muted hover:text-ink"
+            <a
+              href={`mailto:${site.email}`}
+              className="group inline-flex shrink-0 items-baseline gap-3 border-b-2 border-signal pb-1 font-mono text-micro uppercase tracking-[0.2em] text-signal"
+            >
+              Email me
+              <span
+                aria-hidden
+                className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5"
               >
-                {link.label}
-              </a>
-            ))}
+                ↗
+              </span>
+            </a>
           </div>
         </div>
       </section>
+
+      {/* Only moving thing on the page, and it is content rather than
+          decoration — see components/ticker.tsx. */}
+      <div className="-mx-5 mb-24 sm:-mx-8">
+        <Ticker />
+      </div>
 
       {/* ---- WORK ------------------------------------------------- */}
       <section className="pb-28">
@@ -98,12 +101,13 @@ export default function Home() {
       </section>
 
       {/* ---- UPSTREAM — the signature element ---------------------- */}
-      <section className="pb-28">
+      <section className="pb-32">
         <SectionHead label="Upstream" count={upstream.length} />
-        <p className="mb-8 max-w-[62ch] text-sm leading-relaxed text-muted">
+        <p className="mb-10 max-w-[54ch] text-lead leading-[1.4] text-muted">
           Fixes sent to libraries I use in production. Each one ships with a
-          regression test that fails on <code className="font-mono">main</code>{" "}
-          and passes with the patch.
+          regression test that fails on{" "}
+          <code className="font-mono text-body text-ink">main</code> and passes
+          with the patch.
         </p>
         <UpstreamLedger />
       </section>
@@ -112,11 +116,11 @@ export default function Home() {
       {posts.length > 0 && (
         <section className="pb-16">
           <SectionHead label="Writing" count={posts.length} />
-          <ul className="border-t border-rule">
+          <ul>
             {posts.map((post, i) => (
               <li
                 key={post.slug}
-                className="rise"
+                className="reveal"
                 style={{ "--i": i } as React.CSSProperties}
               >
                 <Link

@@ -10,7 +10,8 @@ export function UpstreamLedger() {
     <div className="overflow-x-auto">
       <table className="w-full min-w-[44rem] border-collapse text-left">
         <thead>
-          <tr className="border-y border-rule font-mono text-micro uppercase tracking-[0.18em] text-faint">
+          {/* border-b only — SectionHead draws the rule above the table. */}
+          <tr className="border-b border-rule font-mono text-micro uppercase tracking-[0.18em] text-faint">
             <th scope="col" className="py-3 pr-6 font-normal">
               Project
             </th>
@@ -32,7 +33,7 @@ export function UpstreamLedger() {
           {upstream.map((row, i) => (
             <tr
               key={row.repo}
-              className="rise group border-b border-rule align-baseline transition-colors duration-500 hover:bg-sunk"
+              className="reveal group border-b border-rule align-baseline transition-colors duration-500 hover:bg-sunk"
               style={{ "--i": i } as React.CSSProperties}
             >
               <th scope="row" className="py-4 pr-6 font-normal">
@@ -40,7 +41,7 @@ export function UpstreamLedger() {
                   href={row.href}
                   target="_blank"
                   rel="noreferrer"
-                  className="link font-mono text-sm text-ink"
+                  className="link font-mono text-sm text-ink transition-colors duration-300 group-hover:text-signal"
                 >
                   {row.repo}
                 </a>

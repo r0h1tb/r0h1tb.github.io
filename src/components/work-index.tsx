@@ -3,9 +3,14 @@ import type { Work } from "@/lib/content";
 
 /**
  * The index list — this replaces "three feature cards in a row".
- * Numerals hang in the left margin, which breaks the content grid on
- * purpose. Rows are hairline-ruled rather than boxed: no card, no
- * radius, no shadow.
+ *
+ * The numeral is set at display scale in the left margin rather than as
+ * a small mono label: it is the strongest device an editorial index has,
+ * and at 11px it was doing nothing. Rows are hairline-ruled, never
+ * boxed — no card, no radius, no shadow.
+ *
+ * Hover changes weight and colour, not opacity. Fading something to 80%
+ * is the default that reads as unconsidered.
  */
 export function WorkIndex({ items }: { items: Work[] }) {
   if (items.length === 0) {
@@ -16,37 +21,49 @@ export function WorkIndex({ items }: { items: Work[] }) {
     );
   }
 
+  // No top border: SectionHead already draws the rule above this list.
   return (
-    <ol className="border-t border-rule">
+    <ol>
       {items.map((work, i) => (
-        <li key={work.slug} className="rise" style={{ "--i": i } as React.CSSProperties}>
+        <li
+          key={work.slug}
+          className="reveal"
+          style={{ "--i": i } as React.CSSProperties}
+        >
           <Link
             href={`/work/${work.slug}`}
-            className="group grid grid-cols-[2.5rem_1fr] items-baseline gap-x-4 border-b border-rule py-6 transition-colors duration-500 hover:bg-sunk sm:grid-cols-[3.5rem_minmax(0,1fr)_auto] sm:gap-x-8 sm:py-7"
+            className="group grid grid-cols-[3.25rem_minmax(0,1fr)] items-start gap-x-4 border-b border-rule py-7 transition-colors duration-500 hover:bg-sunk sm:grid-cols-[5.5rem_minmax(0,1fr)_auto] sm:gap-x-8 sm:py-9"
           >
-            <span className="tnum font-mono text-micro text-faint transition-colors duration-300 group-hover:text-signal">
+            <span
+              aria-hidden
+              className="tnum font-display text-h2 leading-[0.8] text-rule transition-colors duration-500 group-hover:text-signal"
+            >
               {String(i + 1).padStart(2, "0")}
             </span>
 
             <div className="min-w-0">
-              <h3 className="font-display text-h3 leading-[1.05] sm:text-h2">
+              <h3 className="font-display text-h3 leading-[1.02] tracking-[-0.015em] sm:text-h2">
                 {work.title}
               </h3>
-              <p className="mt-2 max-w-[46ch] text-sm leading-relaxed text-muted">
+              <p className="mt-3 max-w-[52ch] text-sm leading-relaxed text-muted">
                 {work.summary}
               </p>
               {work.stack && (
-                <p className="mt-3 font-mono text-micro uppercase tracking-[0.16em] text-faint">
-                  {work.stack.join(" · ")}
-                </p>
+                <ul className="mt-4 flex flex-wrap gap-x-2.5 gap-y-1.5 font-mono text-micro uppercase tracking-[0.14em] text-faint">
+                  {work.stack.map((s) => (
+                    <li key={s} className="border border-rule px-1.5 py-0.5">
+                      {s}
+                    </li>
+                  ))}
+                </ul>
               )}
             </div>
 
-            <span className="col-start-2 mt-4 flex items-baseline gap-4 font-mono text-micro uppercase tracking-[0.18em] text-faint sm:col-start-3 sm:mt-0 sm:justify-end">
+            <span className="col-start-2 mt-5 flex items-baseline gap-4 font-mono text-micro uppercase tracking-[0.18em] text-faint sm:col-start-3 sm:mt-2 sm:justify-end">
               <span className="tnum">{work.year}</span>
               <span
                 aria-hidden
-                className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1 group-hover:text-signal"
+                className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:translate-x-1.5 group-hover:text-signal"
               >
                 →
               </span>

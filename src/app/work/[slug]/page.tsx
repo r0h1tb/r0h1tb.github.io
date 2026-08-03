@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getAllWork, getWork } from "@/lib/content";
-import { Shell } from "@/components/section";
+import { ReadingProgress, Shell } from "@/components/section";
 
 type Params = { params: Promise<{ slug: string }> };
 
@@ -27,6 +27,7 @@ export default async function WorkDetail({ params }: Params) {
 
   return (
     <Shell>
+      <ReadingProgress />
       <article className="pt-12 sm:pt-20">
         <Link
           href="/work"

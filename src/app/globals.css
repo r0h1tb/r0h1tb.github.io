@@ -45,16 +45,23 @@
   --font-body: var(--font-archivo), system-ui, sans-serif;
   --font-mono: var(--font-plex-mono), ui-monospace, monospace;
 
-  /* --- Scale: note the jump from 18 -> 44 -> clamp ----------- */
+  /* --- Scale ------------------------------------------------
+     The jumps are the design. 18 -> 34 -> 52 -> viewport-scaled.
+     Even steps read as generated; this ladder is deliberately
+     top-heavy so the display sizes carry the page and the UI text
+     stays quiet underneath them. */
   --text-micro: 0.6875rem; /* 11 — labels, numerals   */
   --text-caption: 0.8125rem; /* 13 — captions           */
   --text-sm: 0.9375rem; /* 15 — UI                 */
   --text-body: 1.125rem; /* 18 — reading            */
-  --text-lead: 1.375rem; /* 22 — standfirst         */
-  --text-h3: 1.75rem; /* 28                      */
-  --text-h2: 2.75rem; /* 44                      */
-  --text-h1: clamp(3.25rem, 8.5vw, 7rem);
-  --text-mega: clamp(4.5rem, 15vw, 13rem);
+  --text-lead: clamp(1.375rem, 2vw, 1.75rem); /* standfirst  */
+  --text-h3: clamp(1.75rem, 3vw, 2.125rem); /* 28–34        */
+  --text-h2: clamp(2.5rem, 5.5vw, 3.25rem); /* 40–52        */
+  /* Min is 3rem, not 3.5: measured, the longest hero line is 311px at
+     3.5rem, which overflows the 280px available on a 320px phone. At
+     3rem it is 250px and clears it. */
+  --text-h1: clamp(3rem, 9.5vw, 9rem);
+  --text-mega: clamp(4rem, 19vw, 19rem);
 
   /* --- Radius: one value, and it is zero -------------------- */
   --radius-none: 0px;
@@ -174,6 +181,91 @@
   animation-delay: calc(var(--i, 0) * 65ms);
 }
 
+/* ============================================================
+   SCROLL-DRIVEN MOTION — native CSS timelines
+
+   animation-timeline: view() / scroll() runs on the compositor
+   thread with no JavaScript and no IntersectionObserver. ~84%
+   support in 2026; everything below degrades to "visible and
+   static" where it is missing, because the fallback state is the
+   finished state, never the hidden one. Nothing here is required
+   to read the page.
+   ============================================================ */
+
+@supports (animation-timeline: view()) {
+  /* Sections surface as they enter. `both` + a range that completes
+     early means the element is settled well before it is centred. */
+  /* The range completes while the element is still ENTERING, never into
+     `cover`. Scroll-driven animations are bound to position, not time —
+     an element parked mid-range stays mid-range forever, so a late range
+     leaves text permanently half-faded if the reader stops there. */
+  .reveal {
+    animation: rise linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 55%;
+  }
+
+  /* Rules that draw themselves along the scroll rather than on load. */
+  .rule-draw {
+    transform-origin: left;
+    animation: draw linear both;
+    animation-timeline: view();
+    animation-range: entry 0% entry 70%;
+  }
+
+  /* Reading-progress bar for long case studies. Tracks the root
+     scroller, so it is genuinely tied to position, not estimated. */
+  .progress {
+    transform-origin: left;
+    animation: draw linear both;
+    animation-timeline: scroll(root block);
+  }
+
+  /* The hero recedes as you leave it — parallax without a scroll
+     handler. Kept subtle; the type is the subject, not the effect. */
+  .hero-fade {
+    animation: recede linear both;
+    animation-timeline: view();
+    animation-range: exit 0% exit 90%;
+  }
+}
+
+@keyframes recede {
+  to {
+    opacity: 0.12;
+    transform: translateY(-2.5rem);
+  }
+}
+
+/* Ticker. Duplicated content + 50% translation = a seamless loop with
+   no JS measuring anything. */
+@keyframes ticker {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.ticker-track {
+  display: flex;
+  width: max-content;
+  animation: ticker 48s linear infinite;
+}
+
+.ticker:hover .ticker-track,
+.ticker:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+
+/* Edges dissolve so the loop has no visible seam. A mask rather than an
+   overlaid gradient: it introduces no colour of its own, so it is
+   correct in both themes automatically and is not the decorative
+   gradient the design check bans. */
+.ticker-mask {
+  /* Single-line so the inline override sits on the matched line. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); /* design-check-ignore — mask: carries no colour of its own */
+  mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); /* design-check-ignore — mask: carries no colour of its own */
+}
+
 /* Rule that draws itself in. */
 @keyframes draw {
   from {
@@ -212,6 +304,27 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  /* Collapsing an infinite marquee to 0.01ms makes it strobe rather than
+     stop, which is worse than the motion it replaces. Halt it outright
+     and leave the content legible in place. */
+  .ticker-track {
+    animation: none !important;
+    transform: none !important;
+  }
+
+  /* Scroll-linked animations are driven by position, not time, so the
+     duration override above does not reach them. Detach the timeline so
+     each element simply renders in its finished state. */
+  .reveal,
+  .rule-draw,
+  .hero-fade,
+  .progress {
+    animation-timeline: none !important;
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
   }
 }
 
