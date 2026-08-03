@@ -26,7 +26,8 @@ export default function WritingPage() {
         <SectionHead label="Archive" count={posts.length} />
 
         {posts.length === 0 ? (
-          <p className="max-w-[52ch] border-t border-rule py-8 text-body text-muted">
+          // No border-t: SectionHead already draws the rule above.
+          <p className="max-w-[52ch] pt-2 text-body text-muted">
             Nothing published yet — I&rsquo;d rather post nothing than post
             filler. Two pieces are in progress, on idempotency in
             message-driven systems and on a data race that CI could not
@@ -37,11 +38,11 @@ export default function WritingPage() {
             cover the same ground.
           </p>
         ) : (
-          <ul className="border-t border-rule">
+          <ul>
             {posts.map((post, i) => (
               <li
                 key={post.slug}
-                className="rise"
+                className="reveal"
                 style={{ "--i": i } as React.CSSProperties}
               >
                 <Link

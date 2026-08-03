@@ -15,9 +15,8 @@ import type { Work } from "@/lib/content";
 export function WorkIndex({ items }: { items: Work[] }) {
   if (items.length === 0) {
     return (
-      <p className="border-t border-rule py-8 text-body text-muted">
-        Nothing here yet.
-      </p>
+      // No border-t: SectionHead draws the rule above.
+      <p className="pt-2 text-body text-muted">Nothing here yet.</p>
     );
   }
 
