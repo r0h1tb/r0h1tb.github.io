@@ -91,6 +91,33 @@ function checkWritingRoute() {
   return null;
 }
 
+/**
+ * `themeColor` is written into a <meta> tag at build time, before any CSS
+ * exists, so it cannot reference --color-paper and has to repeat the
+ * literal. Duplication invites drift — the page background changes, the
+ * mobile browser chrome does not, and a seam appears above the site on
+ * every phone. Assert the two agree.
+ */
+function checkThemeColor() {
+  let css, tsx;
+  try {
+    css = readFileSync(join("src", "app", "globals.css"), "utf8");
+    tsx = readFileSync(join("src", "app", "layout.tsx"), "utf8");
+  } catch {
+    return null;
+  }
+
+  // First --color-paper in @theme is the default (dark) value.
+  const paper = css.match(/--color-paper:\s*(#[0-9a-fA-F]{3,8})/)?.[1];
+  const theme = tsx.match(/themeColor:\s*"(#[0-9a-fA-F]{3,8})"/)?.[1];
+
+  if (!paper || !theme) return null;
+  if (paper.toLowerCase() !== theme.toLowerCase()) {
+    return `themeColor ${theme} in layout.tsx does not match --color-paper ${paper} in globals.css.\n    Fix: set themeColor to ${paper}`;
+  }
+  return null;
+}
+
 function walk(dir, out = []) {
   let entries;
   try {
@@ -133,18 +160,21 @@ for (const file of files) {
   }
 }
 
-const routeProblem = checkWritingRoute();
+const invariants = [
+  ["writing route out of sync", checkWritingRoute()],
+  ["theme colour out of sync", checkThemeColor()],
+].filter(([, problem]) => problem);
 
-if (findings.length === 0 && !routeProblem) {
+if (findings.length === 0 && invariants.length === 0) {
   console.log(`design-check: clean (${files.length} files)`);
   process.exit(0);
 }
 
-if (routeProblem) {
-  console.error(`\ndesign-check: writing route out of sync\n`);
-  console.error(`    ${routeProblem}\n`);
-  if (findings.length === 0) process.exit(1);
+for (const [label, problem] of invariants) {
+  console.error(`\ndesign-check: ${label}\n`);
+  console.error(`    ${problem}\n`);
 }
+if (findings.length === 0) process.exit(1);
 
 console.error(`\ndesign-check: ${findings.length} issue(s)\n`);
 for (const f of findings) {

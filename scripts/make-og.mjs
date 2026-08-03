@@ -19,11 +19,14 @@ import { ImageResponse } from "next/dist/server/og/image-response.js";
 
 // Keep in step with @theme in src/app/globals.css. Satori resolves no
 // CSS custom properties, so these have to be literals.
-const INK = "#16151a";
-const PAPER = "#fbfaf7";
-const MUTED = "#55535c";
-const RULE = "#dad6cc";
-const SIGNAL = "#c8102e";
+//
+// Dark, matching the site's default — a light preview card next to a
+// dark site reads as someone else's link.
+const INK = "#f2f0ea";
+const PAPER = "#121116";
+const MUTED = "#9c99a4";
+const RULE = "#2e2c36";
+const SIGNAL = "#ff4438";
 
 const { site } = await import("../src/lib/site.ts");
 

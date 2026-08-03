@@ -22,23 +22,31 @@
   --radius-*: initial;
   --text-*: initial;
 
-  /* --- Colour: 6 values, warm-neutral greys, one signal ------ */
+  /* --- Colour: 7 values, warm-neutral greys, one signal -------
+     DARK IS THE DEFAULT. The site commits to one look rather than
+     following the OS, so these are the dark values and the light
+     set below is the opt-in. To go back to following the system,
+     swap the two blocks in @layer base — nothing else depends on
+     which is written first.
+
+     `paper`/`ink` stay named for their role, not their lightness:
+     paper is always the page, ink is always the type on it. */
   --color-transparent: transparent;
   --color-current: currentColor;
 
-  --color-paper: #fbfaf7; /* page                     */
-  --color-sunk: #f0eee8; /* recessed panels          */
-  --color-rule: #dad6cc; /* hairlines                */
-  --color-ink: #16151a; /* headlines, body          */
-  --color-muted: #55535c; /* secondary text           */
-  --color-faint: #6e6b73; /* captions, metadata       */
-  --color-signal: #c8102e; /* the ONE accent           */
+  --color-paper: #121116; /* page                     */
+  --color-sunk: #1a191f; /* recessed panels          */
+  --color-rule: #2e2c36; /* hairlines                */
+  --color-ink: #f2f0ea; /* headlines, body          */
+  --color-muted: #9c99a4; /* secondary text           */
+  --color-faint: #83808b; /* captions, metadata       */
+  --color-signal: #ff4438; /* the ONE accent           */
 
   /* `faint` carries 11px mono labels, dates and the ledger's figures, so
      it is held to 4.5:1 against BOTH paper and sunk (hovered rows) —
-     5.01:1 and 4.51:1. The lighter grey this replaced looked better and
-     failed AA at 3.33:1. Verified, not eyeballed: small text needs more
-     contrast, not less. Re-check any change with a WCAG calculator. */
+     4.86:1 and 4.51:1 on dark. Verified, not eyeballed: small text needs
+     more contrast, not less. Re-check any change with a WCAG
+     calculator. */
 
   /* --- Type: three roles ------------------------------------ */
   --font-display: var(--font-instrument-serif), "Times New Roman", serif;
@@ -72,34 +80,26 @@
   --ease-out-quart: cubic-bezier(0.25, 1, 0.5, 1);
 }
 
-/* --- Dark: inverted ink/paper, not a different design -------- */
 @layer base {
+  /* Dark by default, and it does not follow prefers-color-scheme — the
+     look is a deliberate choice, not a preference to be negotiated.
+     color-scheme tells the browser to render form controls, scrollbars
+     and the address bar to match. */
   :root {
-    color-scheme: light;
-  }
-
-  @media (prefers-color-scheme: dark) {
-    :root:not([data-theme="light"]) {
-      color-scheme: dark;
-      --color-paper: #121116;
-      --color-sunk: #1a191f;
-      --color-rule: #2e2c36;
-      --color-ink: #f2f0ea;
-      --color-muted: #9c99a4;
-      --color-faint: #83808b; /* 4.86:1 on paper, 4.51:1 on sunk */
-      --color-signal: #ff4438;
-    }
-  }
-
-  :root[data-theme="dark"] {
     color-scheme: dark;
-    --color-paper: #121116;
-    --color-sunk: #1a191f;
-    --color-rule: #2e2c36;
-    --color-ink: #f2f0ea;
-    --color-muted: #9c99a4;
-    --color-faint: #83808b; /* 4.86:1 on paper, 4.51:1 on sunk */
-    --color-signal: #ff4438;
+  }
+
+  /* Light remains fully built and reachable via data-theme="light".
+     Every pair here clears AA; see the audit note above. */
+  :root[data-theme="light"] {
+    color-scheme: light;
+    --color-paper: #fbfaf7;
+    --color-sunk: #f0eee8;
+    --color-rule: #dad6cc;
+    --color-ink: #16151a;
+    --color-muted: #55535c;
+    --color-faint: #6e6b73; /* 5.01:1 on paper, 4.51:1 on sunk */
+    --color-signal: #c8102e;
   }
 
   html {
@@ -150,16 +150,23 @@
    CRAFT LAYER
    ============================================================ */
 
-/* Grain. Real film grain is irregular; feTurbulence is the closest
-   we get without shipping an image. Kept at 3.5% — if you can see
-   it as texture rather than feel it, it is too heavy. */
+/* Grain. Real film grain is irregular; feTurbulence is the closest we
+   get without shipping an image.
+
+   `overlay` rather than flat opacity: the noise is dark, so on the dark
+   default it would simply disappear against the page. Overlay darkens
+   what is already dark and lightens what is light, so one texture reads
+   in both themes. Opacity is higher than the 3.5% the light-only
+   version used, because blending costs some of it back — still felt
+   rather than seen. */
 .grain::after {
   content: "";
   position: fixed;
   inset: -50%;
   z-index: 60;
   pointer-events: none;
-  opacity: 0.035;
+  opacity: 0.16;
+  mix-blend-mode: overlay;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -478,20 +485,12 @@
    the page instead of staying stuck in one theme. */
 .shiki,
 .shiki span {
-  color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) .shiki,
-  :root:not([data-theme="light"]) .shiki span {
-    color: var(--shiki-dark);
-    background-color: var(--shiki-dark-bg);
-  }
-}
-
-:root[data-theme="dark"] .shiki,
-:root[data-theme="dark"] .shiki span {
   color: var(--shiki-dark);
   background-color: var(--shiki-dark-bg);
+}
+
+:root[data-theme="light"] .shiki,
+:root[data-theme="light"] .shiki span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
 }

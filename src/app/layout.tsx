@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Archivo, IBM_Plex_Mono, Instrument_Serif } from "next/font/google";
 import { site } from "@/lib/site";
 import { SiteHeader } from "@/components/site-header";
@@ -27,6 +27,16 @@ const mono = IBM_Plex_Mono({
   weight: ["400", "500"],
   display: "swap",
 });
+
+/**
+ * Matches --color-paper. Without this, mobile Safari and Chrome paint
+ * their own chrome light and it butts against a dark page — a visible
+ * seam above the site on every phone.
+ */
+export const viewport: Viewport = {
+  themeColor: "#121116", // design-check-ignore — must match --color-paper; guarded by check:design
+  colorScheme: "dark",
+};
 
 export const metadata: Metadata = {
   // Needed for OG image URLs to resolve to absolute paths. Override with
