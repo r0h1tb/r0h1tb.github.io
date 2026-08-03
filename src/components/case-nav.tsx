@@ -37,10 +37,12 @@ export function CaseNav({ prev, next }: { prev?: Work; next?: Work }) {
           </span>
         </Link>
       ) : (
-        <span className="hidden bg-paper sm:block" />
+        // The grid is gap-px over bg-rule, so a missing cell would show
+        // the rule colour as a filled panel. Fill it with the page.
+        <span aria-hidden className="hidden bg-paper sm:block" />
       )}
 
-      {next && (
+      {next ? (
         <Link
           href={`/work/${next.slug}`}
           className="group flex flex-col items-start gap-3 bg-paper p-6 transition-colors duration-500 hover:bg-sunk sm:items-end sm:p-8 sm:text-right"
@@ -58,6 +60,8 @@ export function CaseNav({ prev, next }: { prev?: Work; next?: Work }) {
             {next.title}
           </span>
         </Link>
+      ) : (
+        <span aria-hidden className="hidden bg-paper sm:block" />
       )}
     </nav>
   );
