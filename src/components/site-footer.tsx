@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { site } from "@/lib/site";
 
 /**
@@ -52,7 +53,19 @@ export function SiteFooter() {
             <span className="mx-2 text-rule">/</span>
             {site.location}
           </p>
-          <p className="tnum">
+          <p className="tnum flex flex-wrap items-baseline gap-x-2">
+            <Link href="/privacy" className="link hover:text-muted">
+              Privacy
+            </Link>
+            <span aria-hidden className="text-rule">
+              /
+            </span>
+            <Link href="/terms" className="link hover:text-muted">
+              Terms
+            </Link>
+            <span aria-hidden className="mx-1 text-rule">
+              ·
+            </span>
             © {new Date().getFullYear()} {site.name}
           </p>
         </div>
