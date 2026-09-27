@@ -12,7 +12,7 @@ stack:
   - Resilience4j
   - Docker
   - Kubernetes
-outcome: Every failure path ends in a defined state — a stage retries three times with backoff, a circuit breaker opens at a 50% failure rate, unrecoverable work dead-letters to a terminal failed state, and a redelivered message never runs a stage twice.
+outcome: Every failure path ends in a defined state — a stage retries three times with backoff, a circuit breaker opens at a 50% failure rate, unrecoverable work dead-letters to a terminal failed state, and a repeated submission returns the original result instead of opening a second application.
 order: 1
 draft: false
 ---
@@ -68,9 +68,11 @@ against the same workflow state.
 
 ## Outcome
 
-The test suite drives each failure mode against the mocked downstream
-systems — timeout, open circuit, malformed response, redelivery — and
-each one ends in a defined state: the stage retries, or the application
-dead-letters to a terminal failed state instead of retrying forever.
-Redelivering the same message never runs a stage twice. These are
-results from tests against mocks, not from production traffic.
+Retries, the circuit breaker and dead-lettering are configured per
+downstream system, so a failed stage either retries or ends in a
+terminal failed state instead of retrying forever. The tests pin the
+parts that protect the customer: a repeated submission with the same
+idempotency key returns the original result, a conflicting one is
+rejected, and a second application for an applicant already in flight
+is refused. All of it runs against mocked downstream systems, not
+production traffic.
