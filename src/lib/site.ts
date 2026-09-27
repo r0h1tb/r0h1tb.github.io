@@ -15,7 +15,7 @@ export const site = {
   /** The hero line. Specific enough that nobody else could sign it. */
   statement: "I build banking APIs where a retry has to be idempotent.",
 
-  now: "a global bank",
+  now: "Open to backend roles",
 
   location: "Chennai, India",
   timezone: "Asia/Kolkata",

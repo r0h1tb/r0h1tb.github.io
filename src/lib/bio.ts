@@ -50,14 +50,12 @@ export type TimelineEntry = {
 
 export const timeline: TimelineEntry[] = [
   {
-    period: "Jul 2023 — now",
-    title: "Software Developer",
-    org: "a global bank",
+    period: "Jul 2023 — Sep 2026",
+    title: "Senior Analyst, Backend Engineering",
+    org: "A global bank",
     place: "Chennai",
-    current: true,
-    body: "Account-servicing and payment APIs on a global bank's core banking platform. Two programmes of work, both under the constraint that behaviour has to be provably unchanged before anything ships.",
+    body: "Account-servicing and payment APIs on a global bank's core banking platform, where behaviour has to be provably unchanged before anything ships. Joined as a Development Engineer in 2023 and promoted to Senior Analyst in 2025.",
     detail: [
-      "Credit-card onboarding rebuilt event-driven — five REST APIs, RabbitMQ, circuit breakers and DLQs",
       "Legacy modernization off SOAP onto REST, test-driven, 17+ endpoints migrated",
     ],
   },
